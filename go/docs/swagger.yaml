@@ -1,0 +1,661 @@
+definitions:
+  domain.Booking:
+    properties:
+      bookingEnd:
+        type: string
+      bookingStart:
+        type: string
+      createdAt:
+        type: string
+      id:
+        type: integer
+      status:
+        type: string
+      totalPrice:
+        type: integer
+      updatedAt:
+        type: string
+      userID:
+        type: integer
+      vehicleID:
+        type: integer
+    type: object
+  domain.User:
+    properties:
+      address:
+        type: string
+      balance:
+        type: integer
+      createdAt:
+        type: string
+      email:
+        type: string
+      fullName:
+        type: string
+      id:
+        type: integer
+      phoneNumber:
+        type: string
+      updatedAt:
+        type: string
+    type: object
+  domain.Vehicle:
+    properties:
+      category:
+        type: string
+      dailyRate:
+        type: integer
+      description:
+        type: string
+      id:
+        type: integer
+      name:
+        type: string
+      quantity:
+        type: integer
+    type: object
+  dto.BookingRequest:
+    properties:
+      bookingStart:
+        type: string
+      totalDays:
+        minimum: 1
+        type: integer
+      vehicleID:
+        type: integer
+    required:
+    - bookingStart
+    - totalDays
+    - vehicleID
+    type: object
+  dto.CancelRequest:
+    properties:
+      bookingID:
+        type: integer
+      confirm:
+        type: string
+    required:
+    - bookingID
+    - confirm
+    type: object
+  dto.DateRequest:
+    properties:
+      bookingStart:
+        type: string
+      totalDays:
+        minimum: 1
+        type: integer
+    required:
+    - bookingStart
+    - totalDays
+    type: object
+  dto.HandlerResponse:
+    properties:
+      responseCode:
+        type: string
+      responseData: {}
+      responseMessage:
+        type: string
+    type: object
+  dto.LoginRequest:
+    properties:
+      email:
+        type: string
+      password:
+        type: string
+    required:
+    - email
+    - password
+    type: object
+  dto.RegisterRequest:
+    properties:
+      address:
+        type: string
+      adminKey:
+        type: string
+      email:
+        type: string
+      fullName:
+        type: string
+      password:
+        minLength: 8
+        type: string
+      phoneNumber:
+        maxLength: 15
+        minLength: 8
+        type: string
+    required:
+    - address
+    - email
+    - fullName
+    - password
+    - phoneNumber
+    type: object
+  dto.RevenueReportResponse:
+    properties:
+      total_bookings:
+        type: integer
+      total_revenue:
+        type: integer
+    type: object
+  dto.TopUpRequest:
+    properties:
+      amount:
+        minimum: 10000
+        type: integer
+    required:
+    - amount
+    type: object
+  dto.TopVehicle:
+    properties:
+      name:
+        type: string
+      total_bookings:
+        type: integer
+      vehicle_id:
+        type: integer
+    type: object
+  dto.VehicleAvailableResponse:
+    properties:
+      availableQuantity:
+        type: integer
+      category:
+        type: string
+      dailyRate:
+        type: integer
+      desc:
+        type: string
+      id:
+        type: integer
+      name:
+        type: string
+    type: object
+  dto.VehicleRequest:
+    properties:
+      category:
+        type: string
+      dailyRate:
+        type: integer
+      description:
+        type: string
+      name:
+        type: string
+      quantity:
+        type: integer
+    required:
+    - category
+    - dailyRate
+    - description
+    - name
+    - quantity
+    type: object
+info:
+  contact: {}
+paths:
+  /api/v1/Vehicles:
+    post:
+      consumes:
+      - application/json
+      description: Creates a new vehicle to the vehicles database
+      parameters:
+      - description: Vehicle Data
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/dto.VehicleRequest'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            allOf:
+            - $ref: '#/definitions/dto.HandlerResponse'
+            - properties:
+                responseData:
+                  $ref: '#/definitions/domain.Vehicle'
+              type: object
+        "400":
+          description: Bad request or validation error
+          schema:
+            $ref: '#/definitions/dto.HandlerResponse'
+        "500":
+          description: Internal server error
+          schema:
+            $ref: '#/definitions/dto.HandlerResponse'
+      security:
+      - BearerAuth: []
+      summary: Create a new vehicle
+      tags:
+      - Vehicles
+  /api/v1/Vehicles/{id}:
+    put:
+      consumes:
+      - application/json
+      description: update existing vehicle database
+      parameters:
+      - description: vehicle ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      - description: Vehicle Data
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/dto.VehicleRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/dto.HandlerResponse'
+            - properties:
+                responseData:
+                  $ref: '#/definitions/domain.Vehicle'
+              type: object
+        "400":
+          description: Bad request or validation error
+          schema:
+            $ref: '#/definitions/dto.HandlerResponse'
+        "404":
+          description: vehicle data is not found
+          schema:
+            $ref: '#/definitions/dto.HandlerResponse'
+        "500":
+          description: Internal server error
+          schema:
+            $ref: '#/definitions/dto.HandlerResponse'
+      security:
+      - BearerAuth: []
+      summary: Update existing vehicle
+      tags:
+      - vehicles
+  /api/v1/bookings:
+    post:
+      consumes:
+      - application/json
+      description: Creates a new vehicle booking for the currently logged-in user
+      parameters:
+      - description: Booking Data
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/dto.BookingRequest'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            allOf:
+            - $ref: '#/definitions/dto.HandlerResponse'
+            - properties:
+                responseData:
+                  $ref: '#/definitions/domain.Booking'
+              type: object
+        "400":
+          description: Bad request or validation error
+          schema:
+            $ref: '#/definitions/dto.HandlerResponse'
+        "404":
+          description: Vehicle unavailable for selected dates
+          schema:
+            $ref: '#/definitions/dto.HandlerResponse'
+        "500":
+          description: Internal server error
+          schema:
+            $ref: '#/definitions/dto.HandlerResponse'
+      security:
+      - BearerAuth: []
+      summary: Create a new booking
+      tags:
+      - Bookings
+  /api/v1/bookings/cancel:
+    post:
+      consumes:
+      - application/json
+      description: Cancels an existing booking owned by the currently logged-in user
+      parameters:
+      - description: Cancel Data
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/dto.CancelRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/dto.HandlerResponse'
+            - properties:
+                responseData:
+                  $ref: '#/definitions/domain.Booking'
+              type: object
+        "400":
+          description: Bad request or invalid confirmation
+          schema:
+            $ref: '#/definitions/dto.HandlerResponse'
+        "401":
+          description: User not authorized to cancel this booking
+          schema:
+            $ref: '#/definitions/dto.HandlerResponse'
+        "500":
+          description: Internal server error
+          schema:
+            $ref: '#/definitions/dto.HandlerResponse'
+      security:
+      - BearerAuth: []
+      summary: Cancel a booking
+      tags:
+      - Bookings
+  /api/v1/bookings/history:
+    get:
+      consumes:
+      - application/json
+      description: Retrieves all bookings made by the currently logged-in user
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/dto.HandlerResponse'
+            - properties:
+                responseData:
+                  items:
+                    $ref: '#/definitions/domain.Booking'
+                  type: array
+              type: object
+        "404":
+          description: No bookings found
+          schema:
+            $ref: '#/definitions/dto.HandlerResponse'
+        "500":
+          description: Internal server error
+          schema:
+            $ref: '#/definitions/dto.HandlerResponse'
+      security:
+      - BearerAuth: []
+      summary: Get booking history
+      tags:
+      - Bookings
+  /api/v1/reports/revenue:
+    get:
+      description: retrieves revenu report for all completed booking from database
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/dto.HandlerResponse'
+            - properties:
+                responseData:
+                  $ref: '#/definitions/dto.RevenueReportResponse'
+              type: object
+        "400":
+          description: Bad request or validation error
+          schema:
+            $ref: '#/definitions/dto.HandlerResponse'
+        "500":
+          description: Internal server error
+          schema:
+            $ref: '#/definitions/dto.HandlerResponse'
+      security:
+      - BearerAuth: []
+      summary: Get revenue report
+      tags:
+      - Reports
+  /api/v1/reports/top-vehicle:
+    get:
+      description: retrieves report for top most booked vehicle from bookings database
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/dto.HandlerResponse'
+            - properties:
+                responseData:
+                  $ref: '#/definitions/dto.TopVehicle'
+              type: object
+        "400":
+          description: Bad request or validation error
+          schema:
+            $ref: '#/definitions/dto.HandlerResponse'
+        "500":
+          description: Internal server error
+          schema:
+            $ref: '#/definitions/dto.HandlerResponse'
+      security:
+      - BearerAuth: []
+      summary: Get top vehicle report
+      tags:
+      - Reports
+  /api/v1/users/profile:
+    get:
+      consumes:
+      - application/json
+      description: Retrieves the currently logged-in user's profile information using
+        JWT
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/dto.HandlerResponse'
+            - properties:
+                responseData:
+                  $ref: '#/definitions/domain.User'
+              type: object
+        "400":
+          description: Bad request
+          schema:
+            $ref: '#/definitions/dto.HandlerResponse'
+        "500":
+          description: Internal server error
+          schema:
+            $ref: '#/definitions/dto.HandlerResponse'
+      security:
+      - BearerAuth: []
+      summary: Get user profile
+      tags:
+      - Users
+  /api/v1/users/topup:
+    post:
+      consumes:
+      - application/json
+      description: Adds the specified amount to the currently logged-in user's balance
+      parameters:
+      - description: Top Up Data
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/dto.TopUpRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Successfully topped up balance
+          schema:
+            $ref: '#/definitions/dto.HandlerResponse'
+        "400":
+          description: Bad request or validation error
+          schema:
+            $ref: '#/definitions/dto.HandlerResponse'
+        "500":
+          description: Internal server error
+          schema:
+            $ref: '#/definitions/dto.HandlerResponse'
+      security:
+      - BearerAuth: []
+      summary: Top up user balance
+      tags:
+      - Users
+  /api/v1/vehicles:
+    get:
+      consumes:
+      - application/json
+      description: Retrieves a list of all available vehicles for rental
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/dto.HandlerResponse'
+            - properties:
+                responseData:
+                  items:
+                    $ref: '#/definitions/domain.Vehicle'
+                  type: array
+              type: object
+        "400":
+          description: Bad request or validation error
+          schema:
+            $ref: '#/definitions/dto.HandlerResponse'
+        "404":
+          description: No vehicles found
+          schema:
+            $ref: '#/definitions/dto.HandlerResponse'
+        "500":
+          description: Internal server error
+          schema:
+            $ref: '#/definitions/dto.HandlerResponse'
+      security:
+      - BearerAuth: []
+      summary: Get all vehicles
+      tags:
+      - Vehicles
+  /api/v1/vehicles/date:
+    post:
+      consumes:
+      - application/json
+      description: Retrieves vehicles that are available for booking within the specified
+        date range
+      parameters:
+      - description: Date Range
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/dto.DateRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/dto.HandlerResponse'
+            - properties:
+                responseData:
+                  items:
+                    $ref: '#/definitions/dto.VehicleAvailableResponse'
+                  type: array
+              type: object
+        "400":
+          description: Bad request or validation error
+          schema:
+            $ref: '#/definitions/dto.HandlerResponse'
+        "404":
+          description: No vehicles available
+          schema:
+            $ref: '#/definitions/dto.HandlerResponse'
+        "500":
+          description: Internal server error
+          schema:
+            $ref: '#/definitions/dto.HandlerResponse'
+      security:
+      - BearerAuth: []
+      summary: Get available vehicles by date
+      tags:
+      - Vehicles
+  /users/login:
+    post:
+      consumes:
+      - application/json
+      description: Authenticates a user and returns a JWT token
+      parameters:
+      - description: Login Credentials
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/dto.LoginRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/dto.HandlerResponse'
+            - properties:
+                responseData:
+                  type: object
+              type: object
+        "400":
+          description: Bad request
+          schema:
+            $ref: '#/definitions/dto.HandlerResponse'
+        "500":
+          description: Internal server error
+          schema:
+            $ref: '#/definitions/dto.HandlerResponse'
+      summary: User login
+      tags:
+      - Authentication
+  /users/register:
+    post:
+      consumes:
+      - application/json
+      description: Creates a new user account in the database
+      parameters:
+      - description: Registration Data
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/dto.RegisterRequest'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            allOf:
+            - $ref: '#/definitions/dto.HandlerResponse'
+            - properties:
+                responseData:
+                  $ref: '#/definitions/domain.User'
+              type: object
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/dto.HandlerResponse'
+        "500":
+          description: Internal server error
+          schema:
+            $ref: '#/definitions/dto.HandlerResponse'
+      summary: Register a new User
+      tags:
+      - Authentication
+swagger: "2.0"

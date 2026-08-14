@@ -43,7 +43,7 @@ func (uc *userUseCase) GetVehicleList() (*[]domain.Vehicle, error) {
 	return vehicles, nil
 }
 func (uc *userUseCase) GetVehicleAvailableByDate(req dto.DateRequest) (*[]dto.VehicleAvailableResponse, error) {
-	endDate := req.BookingStart.AddDate(0,0, req.TotalDays - 1)
+	endDate := req.BookingStart.AddDate(0,0, req.TotalDays)
 	vehicles, err := uc.repo.GetVehiclesAvailableByDate(req.BookingStart, endDate)
 	if err != nil {
 		return nil, err
@@ -108,16 +108,21 @@ func (uc *userUseCase) CancelUserBooking(req dto.CancelRequest, userID int) (*do
 	if err != nil {
 		return nil, err
 	}
+	
 	if booking.UserID != userID {
 		return nil, domain.ErrInvalidBookingUserID
 	}
 	if req.Confirm != "confirm" {
 		return nil, domain.ErrInvalidConfirmInput
 	}
+	if booking.Status != "confirmed" {
+		return nil, domain.ErrInvalidBookingCancel
+	}
 	updatedBooking, err := uc.repo.CancelUserBooking(booking)
 	if err != nil {
 		return nil, err
 	}
+	
 	_, err = uc.repo.UpdateBalance(userID, updatedBooking.TotalPrice)
 	user, err := uc.repo.GetUserProfile(userID)
 	if err != nil {

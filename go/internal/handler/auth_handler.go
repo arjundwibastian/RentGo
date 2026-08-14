@@ -2,6 +2,7 @@ package handler
 
 import (
 	"errors"
+	_ "milestone-02/docs"
 	"milestone-02/internal/domain"
 	"milestone-02/internal/dto"
 
@@ -25,9 +26,9 @@ func NewAuthHandler(authUC domain.AuthUseCase) *AuthHandler {
 // @Accept json
 // @Produce json
 // @Param request body dto.RegisterRequest true "Registration Data"
-// @Success 200 {object} dto.Response{responseData=domain.User}
-// @Failure 400 {object} dto.Response "Bad Request"
-// @Failure 500 {object} dto.Response "Internal server error"
+// @Success 201 {object} dto.HandlerResponse{responseData=domain.User}
+// @Failure 400 {object} dto.HandlerResponse "Bad Request"
+// @Failure 500 {object} dto.HandlerResponse "Internal server error"
 // @Router /users/register [post]
 func (h *AuthHandler) RegisterHandler(c echo.Context) error {
 	var req dto.RegisterRequest
@@ -61,7 +62,7 @@ func (h *AuthHandler) RegisterHandler(c echo.Context) error {
 			})
 		}
 	}
-	return c.JSON(http.StatusOK, dto.HandlerResponse{
+	return c.JSON(http.StatusCreated, dto.HandlerResponse{
 		ResponseCode:    "01",
 		ResponseMessage: "successfully register user",
 		ResponseData:    user,
@@ -75,9 +76,9 @@ func (h *AuthHandler) RegisterHandler(c echo.Context) error {
 // @Accept json
 // @Produce json
 // @Param request body dto.LoginRequest true "Login Credentials"
-// @Success 200 {object} dto.Response{responseData=object}
-// @Failure 400 {object} dto.Response "Bad request"
-// @Failure 500 {object} dto.Response "Internal server error"
+// @Success 200 {object} dto.HandlerResponse{responseData=object}
+// @Failure 400 {object} dto.HandlerResponse "Bad request"
+// @Failure 500 {object} dto.HandlerResponse "Internal server error"
 // @Router /users/login [post]
 func (h *AuthHandler) LoginHandler(c echo.Context) error {
 	var req dto.LoginRequest

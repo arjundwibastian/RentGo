@@ -14,6 +14,7 @@ import (
 	"github.com/joho/godotenv"
 	"github.com/labstack/echo/v4"
 	echoMiddleware "github.com/labstack/echo/v4/middleware"
+	echoSwagger "github.com/swaggo/echo-swagger"
 )
 
 type CustomValidator struct {
@@ -63,6 +64,7 @@ func main() {
 
 	e.POST("/api/v1/users/register", authHandler.RegisterHandler)
 	e.POST("/api/v1/users/login", authHandler.LoginHandler)
+	e.GET("/api/v1/swagger/*", echoSwagger.WrapHandler)
 
 
 	user := e.Group("")
@@ -71,7 +73,7 @@ func main() {
 	user.POST("/api/v1/users/topup", userHandler.AddUserBalanceHandler)
 	user.GET("/api/v1/vehicles", userHandler.GetVehicleListHandler)
 	user.POST("/api/v1/vehicles/date", userHandler.GetVehicleAvailableByDateHandler)
-	
+	user.GET("/api/v1/bookings/history", userHandler.GetUserBookingHistoryHandler)
 	user.POST("/api/v1/bookings", userHandler.CreateBookingHandler)
 	user.POST("/api/v1/bookings/cancel", userHandler.CancelBookingHandler)
 
