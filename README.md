@@ -1,58 +1,22 @@
 # RentGo API
 
-RentGo is a backend REST API service for a vehicle rental platform. The
-application provides functionality for user authentication, vehicle
-management, and rental transactions.
+RentGo is a backend API for a vehicle rental application. This project
+was built using Go and provides features such as user authentication,
+vehicle management, and rental transactions.
 
-The project is built using Go with a Clean Architecture approach to
-maintain separation between business logic, data access, and API
-handling.
-
----
-
-## Features
-
-- User authentication with JWT
-- User registration and login
-- Role-based access control
-- Vehicle management
-- Vehicle rental management
-- Booking and rental transaction handling
-- Request validation
-- PostgreSQL database integration
-- Swagger API documentation
-- Unit testing with mocks
-
----
+The project uses Clean Architecture to separate the API layer, business
+logic, and database operations.
 
 ## Tech Stack
 
-### Backend
-
-- Go (Golang)
+- Go
 - Echo Framework
-- GORM ORM
 - PostgreSQL
-
-### Authentication
-
+- GORM
 - JWT Authentication
-- bcrypt password hashing
+- Swagger
 
-### Documentation
-
-- Swagger / OpenAPI
-
-### Testing
-
-- Go Testing
-- Mock-based testing
-
----
-
-## Architecture
-
-RentGo follows a Clean Architecture pattern:
+## Project Structure
 
     .
     ├── main.go
@@ -65,51 +29,40 @@ RentGo follows a Clean Architecture pattern:
     │   ├── usecase
     │   └── validation
     ├── docs
-    │   └── swagger
-    ├── file.env.example
     └── go.mod
 
-### Layer Explanation
+## Features
 
-**Handler** - Receives HTTP requests - Parses request data - Returns API
-responses
+- User registration and login
+- JWT authentication
+- User management
+- Vehicle management
+- Rental transaction handling
+- Swagger API documentation
 
-**Usecase** - Contains business logic - Handles authentication and
-rental workflows
+## Installation
 
-**Repository** - Handles database operations - Abstracts data
-persistence
-
-**Domain** - Contains entities, interfaces, and business rules
-
----
-
-# Installation
-
-## Clone Repository
+Clone the repository:
 
 ```bash
 git clone https://github.com/arjundwibastian/RentGo.git
+```
+
+Go to the project directory:
+
+```bash
 cd RentGo
 ```
 
-## Install Dependencies
+Install dependencies:
 
 ```bash
 go mod tidy
 ```
 
----
+## Environment Setup
 
-# Environment Configuration
-
-Create:
-
-    file.env
-
-based on:
-
-    file.env.example
+Create a `file.env` file based on `file.env.example`.
 
 Example:
 
@@ -125,25 +78,10 @@ DB_NAME=rentgo
 JWT_SECRET=your_secret_key
 ```
 
----
+Make sure PostgreSQL is running and the database configuration matches
+your environment.
 
-# Database Setup
-
-RentGo uses PostgreSQL.
-
-Create database:
-
-```sql
-CREATE DATABASE rentgo;
-```
-
-Configure your database credentials inside:
-
-    file.env
-
----
-
-# Running the Application
+## Running the Project
 
 Start the API:
 
@@ -151,159 +89,25 @@ Start the API:
 go run main.go
 ```
 
-The API runs on:
+The API will run on:
 
     http://localhost:3000
 
----
+## API Documentation
 
-# API Documentation
-
-Swagger documentation:
+Swagger documentation is available at:
 
     http://localhost:3000/swagger/index.html
 
-Swagger provides: - Available endpoints - Request parameters - Response
-formats - API testing interface
+## Testing
 
----
-
-# Authentication
-
-RentGo uses JWT authentication.
-
-Protected requests require:
-
-```http
-Authorization: Bearer <token>
-```
-
----
-
-# API Endpoints
-
-## Authentication
-
-### Register User
-
-    POST /register
-
-Create a new user account.
-
-### Login
-
-    POST /login
-
-Authenticate user and receive JWT token.
-
----
-
-## User
-
-### Get User Profile
-
-    GET /users/profile
-
-Returns authenticated user information.
-
----
-
-## Vehicle
-
-### Create Vehicle
-
-    POST /vehicles
-
-Create a new rental vehicle.
-
-### Get Vehicles
-
-    GET /vehicles
-
-Retrieve available vehicles.
-
-### Update Vehicle
-
-    PUT /vehicles/:id
-
-Update vehicle information.
-
-### Delete Vehicle
-
-    DELETE /vehicles/:id
-
-Remove a vehicle.
-
----
-
-## Rental
-
-### Create Rental
-
-    POST /rentals
-
-Create a rental transaction.
-
-### Get Rental History
-
-    GET /rentals
-
-Retrieve rental records.
-
----
-
-# Example Request
-
-## Login
-
-Request:
-
-```json
-{
-  "email": "user@mail.com",
-  "password": "password"
-}
-```
-
-Response:
-
-```json
-{
-  "message": "login success",
-  "token": "jwt_token"
-}
-```
-
----
-
-# Testing
-
-Run tests:
+Run tests using:
 
 ```bash
 go test ./...
 ```
 
-Includes testing for: - Authentication usecase - User usecase -
-Repository mocking
+## Notes
 
----
-
-# Environment Security
-
-Do not commit sensitive files:
-
-    file.env
-    .env
-
-Use:
-
-    file.env.example
-
-as a template.
-
----
-
-# License
-
-This project is developed for educational and development purposes.
+This project is still under development and improvements may be added in
+the future.
