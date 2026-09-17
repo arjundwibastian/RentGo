@@ -49,9 +49,69 @@ CREATE TABLE "bookings" (
   CONSTRAINT "valid_booking_dates" CHECK (booking_end > booking_start)
 );
 
+
+delete from users;
+TRUNCATE TABLE users RESTART identity cascade;
+
 ALTER TABLE "bookings" ADD FOREIGN KEY ("user_id") REFERENCES "users" ("id") ON DELETE CASCADE DEFERRABLE INITIALLY IMMEDIATE;
 
 ALTER TABLE "bookings" ADD FOREIGN KEY ("vehicle_id") REFERENCES "vehicles" ("id") ON DELETE RESTRICT DEFERRABLE INITIALLY IMMEDIATE;
 
 
+select * from users;
+
+
+
+
+
+INSERT INTO "vehicles" ("name", "description", "quantity", "daily_rate", "category") 
+VALUES
+  ('Toyota Avanza', 'Mobil MPV keluarga sejuta umat, sangat irit dan lega untuk 7 penumpang.', 5, 350000, 'MPV'),
+  ('Honda Brio Satya', 'City car lincah dan hemat bahan bakar, cocok untuk jalanan macet di Jakarta.', 3, 250000, 'City Car'),
+  ('Toyota Fortuner VRZ', 'SUV tangguh bermesin diesel yang gagah untuk perjalanan luar kota dan medan berat.', 2, 800000, 'SUV'),
+  ('Toyota Innova Zenix', 'Mobil MPV premium dengan kenyamanan ekstra dan kabin yang sangat luas.', 2, 600000, 'Premium MPV'),
+  ('Mitsubishi Xpander', 'Mobil keluarga dengan suspensi empuk dan desain eksterior yang modern.', 4, 400000, 'MPV'),
+  ('Honda HR-V', 'Compact SUV yang stylish dengan fitur keselamatan canggih, cocok untuk eksekutif muda.', 3, 500000, 'Compact SUV');
+
+
+
+INSERT INTO "bookings" ("user_id", "vehicle_id", "booking_start", "booking_end", "total_price", "status")
+VALUES
+  -- 1. Completed Booking: User 2 rented Avanza (ID 1) for 2 days
+  (2, 1, '2026-08-01 08:00:00', '2026-08-03 08:00:00', 700000, 'completed'),
+   (3, 3, '2026-08-15 10:00:00', '2026-08-20 10:00:00', 4000000, 'confirmed'),  
+  (4, 2, '2026-08-10 14:00:00', '2026-08-13 14:00:00', 750000, 'cancelled'),
+  -- 4. Confirmed Booking: User 2 rented Innova Zenix (ID 4) for 1 day
+  (2, 4, '2026-08-25 07:00:00', '2026-08-26 07:00:00', 600000, 'confirmed'),
+  -- 5. Completed Booking: User 4 rented Xpander (ID 5) for 4 days
+  (4, 5, '2026-07-20 09:00:00', '2026-07-24 09:00:00', 1600000, 'completed'),
+  -- 6. Confirmed Booking: User 3 rented Honda HR-V (ID 6) for 2 days
+  (3, 6, '2026-08-18 08:00:00', '2026-08-20 08:00:00', 1000000, 'confirmed');
+select * from vehicles;
 select * from bookings;
+
+
+
+SELECT 
+    vehicles.id, 
+    vehicles.name,
+    vehicles.description,
+    (vehicles.quantity - COUNT(bookings.id)) AS available_quantity,
+    vehicles.daily_rate,
+    vehicles.category
+FROM vehicles
+LEFT JOIN bookings 
+    ON vehicles.id = bookings.vehicle_id 
+    AND bookings.status = 'confirmed'
+    -- reqEnd MUST go here (15th + 4 days = 19th)
+    AND bookings.booking_start < '2026-08-19 08:00:00' 
+    -- reqStart MUST go here (15th)
+    AND bookings.booking_end > '2026-08-15 08:00:00'   
+GROUP BY 
+    vehicles.id, 
+    vehicles.name, 
+    vehicles.description, 
+    vehicles.quantity, 
+    vehicles.daily_rate, 
+    vehicles.category;
+
