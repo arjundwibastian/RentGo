@@ -84,5 +84,5 @@ func main() {
 	admin.PUT("/api/v1/vehicles/:id", adminHandler.UpdateVehicleHandler)
 	admin.GET("/api/v1/reports/revenue", adminHandler.GetRevenueReportHandler)
 	admin.GET("/api/v1/reports/top-vehicle", adminHandler.GetTopVehicleHandler)
-	e.Start(":3000")
+	e.Start(":" + cfg.App.Port)
 }
