@@ -28,6 +28,8 @@ type MockUserRepo struct {
     GetAvailableVehicleErr    error
     CreateBookingResult *domain.Booking
     CreateBookingErr    error
+    CreateBookingAtomicResult *domain.Booking
+    CreateBookingAtomicErr    error
 	GetUserBookingHistoryResult *[]domain.Booking
 	GetUserBookingHistoryErr error
     GetBookingByIDResult *domain.Booking
@@ -36,6 +38,8 @@ type MockUserRepo struct {
     CheckBookingUserErr    error
     CancelUserBookingResult *domain.Booking
     CancelUserBookingErr    error
+    CancelBookingAtomicResult *domain.Booking
+    CancelBookingAtomicErr    error
    
 
     RegisterUserCalled *domain.User
@@ -86,6 +90,12 @@ func(m *MockUserRepo) GetAvailableVehicle(vehicleID int, start, end time.Time) (
 func(m *MockUserRepo) CreateBooking(booking *domain.Booking) (*domain.Booking, error) {
 	return m.CreateBookingResult, m.CreateBookingErr
 }
+func(m *MockUserRepo) CreateBookingAtomic(booking *domain.Booking) (*domain.Booking, error) {
+	if m.CreateBookingAtomicResult != nil || m.CreateBookingAtomicErr != nil {
+		return m.CreateBookingAtomicResult, m.CreateBookingAtomicErr
+	}
+	return m.CreateBookingResult, m.CreateBookingErr
+}
 func(m *MockUserRepo) GetUserBookingHistory(userID int) (*[]domain.Booking, error) {
 	return m.GetUserBookingHistoryResult, m.GetUserBookingHistoryErr
 }
@@ -96,6 +106,12 @@ func(m *MockUserRepo) CheckBookingUser(userID, bookingID int)(bool, error) {
 	return m.CheckBookingUserResult, m.CheckBookingUserErr
 }
 func(m *MockUserRepo) CancelUserBooking(booking *domain.Booking) (*domain.Booking, error) {
+	return m.CancelUserBookingResult, m.CancelUserBookingErr
+}
+func(m *MockUserRepo) CancelBookingAtomic(bookingID, userID int) (*domain.Booking, error) {
+	if m.CancelBookingAtomicResult != nil || m.CancelBookingAtomicErr != nil {
+		return m.CancelBookingAtomicResult, m.CancelBookingAtomicErr
+	}
 	return m.CancelUserBookingResult, m.CancelUserBookingErr
 }
 

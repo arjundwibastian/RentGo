@@ -40,9 +40,9 @@ func (s *SendGridEmailService) SendBookingConfirmation(booking *domain.Booking, 
 	)
 
 	params := &resend.SendEmailRequest{
-        From:    "arjunRental@resend.dev", 
+        From:    "arjunRental@resend.dev",
         To:      []string{user.Email},
-        Subject: "Booking Confirmed",
+        Subject: "Booking Cancelled",
         Html:    htmlContent,
     }
     // Send it!
@@ -50,7 +50,7 @@ func (s *SendGridEmailService) SendBookingConfirmation(booking *domain.Booking, 
     if err != nil {
         return err
     }
-    
+
 	return nil
 }
 

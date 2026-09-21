@@ -91,6 +91,8 @@ func TestCreateNewBooking_Success(t *testing.T) {
 	expectedBooking := &domain.Booking{ID: 10, TotalPrice: 200000, Status: "confirmed"}
 	mockRepo.CreateBookingResult = expectedBooking
 	mockRepo.CreateBookingErr = nil
+	mockRepo.CreateBookingAtomicResult = expectedBooking
+	mockRepo.CreateBookingAtomicErr = nil
 
 	updatedBalance := 300000
 	mockRepo.UpdateBalanceResult = &updatedBalance
@@ -134,7 +136,9 @@ func TestCreateNewBooking_NotEnoughBalance(t *testing.T) {
 	currentlyBooked := 0
 	mockRepo.GetAvailableVehicleResult = &currentlyBooked
 	mockRepo.GetAvailableVehicleErr = nil
-	
+	mockRepo.CreateBookingAtomicResult = nil
+	mockRepo.CreateBookingAtomicErr = domain.ErrNotEnoughBalance
+
 	result, err := uc.CreateNewBooking(req, userID)
 
 	if err == nil {

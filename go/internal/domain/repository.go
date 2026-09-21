@@ -15,12 +15,14 @@ type UserRepository interface {
 	GetVehicles() (*[]Vehicle, error)
 	GetVehiclesAvailableByDate(reqStart, reqEnd time.Time) (*[]dto.VehicleAvailableResponse, error)
 	GetVehicleByID(vehicleID int) (*Vehicle, error)
-	GetAvailableVehicle(vehicleID int, start, end time.Time) (*int, error) 
+	GetAvailableVehicle(vehicleID int, start, end time.Time) (*int, error)
 	CreateBooking(booking *Booking) (*Booking, error)
+	CreateBookingAtomic(booking *Booking) (*Booking, error)
 	GetUserBookingHistory(userID int) (*[]Booking, error)
 	GetBookingByID(bookingID int)(*Booking, error) 
 	CheckBookingUser(userID, bookingID int)(bool, error)
 	CancelUserBooking(booking *Booking) (*Booking, error)
+	CancelBookingAtomic(bookingID, userID int) (*Booking, error)
 	
 
 

@@ -1,6 +1,7 @@
 package usecase
 
 import (
+	"log"
 	"milestone-02/internal/domain"
 	"milestone-02/internal/dto"
 )
@@ -70,27 +71,16 @@ func (uc *userUseCase) CreateNewBooking(req dto.BookingRequest, userID int,) (*d
 		TotalPrice: totalPrice,
 		Status: "confirmed",
 	}
-	available, err := uc.repo.GetAvailableVehicle(newBooking.VehicleID, newBooking.BookingStart, newBooking.BookingEnd)
+	confirmedBooking, err := uc.repo.CreateBookingAtomic(newBooking)
 	if err != nil {
 		return nil, err
 	}
-	if (vehicle.Quantity - *available) < 1 {
-		return nil, domain.ErrvehicleUnavailable
-	}
-	updateBalance := user.Balance - totalPrice
-	if updateBalance < 0 {
-		return nil, domain.ErrNotEnoughBalance
-	}
-	confirmedBooking, err := uc.repo.CreateBooking(newBooking)
-	if err != nil {
-		return nil, err
-	}
-	_ , err = uc.repo.UpdateBalance(user.ID, updateBalance)
-	if err != nil {
-		return nil, err
-	}
-	
-	err = uc.emailService.SendBookingConfirmation(confirmedBooking, vehicle, user)
+
+	go func() {
+		if err := uc.emailService.SendBookingConfirmation(confirmedBooking, vehicle, user); err != nil {
+			log.Printf("send booking confirmation failed booking_id=%d: %v", confirmedBooking.ID, err)
+		}
+	}()
 	return confirmedBooking, nil
 }
 
@@ -104,30 +94,23 @@ func (uc *userUseCase) GetBookingHistory(userID int) (*[]domain.Booking, error) 
 }
 
 func (uc *userUseCase) CancelUserBooking(req dto.CancelRequest, userID int) (*domain.Booking, error){
-	booking, err := uc.repo.GetBookingByID(req.BookingID)
-	if err != nil {
-		return nil, err
-	}
-	
-	if booking.UserID != userID {
-		return nil, domain.ErrInvalidBookingUserID
-	}
 	if req.Confirm != "confirm" {
 		return nil, domain.ErrInvalidConfirmInput
 	}
-	if booking.Status != "confirmed" {
-		return nil, domain.ErrInvalidBookingCancel
-	}
-	updatedBooking, err := uc.repo.CancelUserBooking(booking)
-	if err != nil {
-		return nil, err
-	}
-	
-	_, err = uc.repo.UpdateBalance(userID, updatedBooking.TotalPrice)
 	user, err := uc.repo.GetUserProfile(userID)
 	if err != nil {
 		return nil, err
 	}
-	err = uc.emailService.SendBookingCancellation(updatedBooking, user)
+	updatedBooking, err := uc.repo.CancelBookingAtomic(req.BookingID, userID)
+	if err != nil {
+		return nil, err
+	}
+
+	
+	go func() {
+		if err := uc.emailService.SendBookingCancellation(updatedBooking, user); err != nil {
+			log.Printf("send booking cancellation failed booking_id=%d: %v", updatedBooking.ID, err)
+		}
+	}()
 	return updatedBooking, nil
 }
