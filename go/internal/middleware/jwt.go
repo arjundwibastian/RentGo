@@ -42,6 +42,9 @@ func (m *JWTMiddleware) Authenticate(next echo.HandlerFunc) echo.HandlerFunc {
 		}
 
 		token, err := jwt.Parse(tokenString, func(t *jwt.Token) (interface{}, error) {
+			if t.Method.Alg() != jwt.SigningMethodHS256.Alg() {
+				return nil, jwt.ErrSignatureInvalid
+			}
 			return m.jwtSecret, nil
 		})
 		if err != nil || !token.Valid {
