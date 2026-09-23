@@ -1,32 +1,28 @@
 package main
 
 import (
+	"context"
 	"log"
 	"milestone-02/internal/config"
+	"milestone-02/internal/domain"
 	"milestone-02/internal/handler"
 	"milestone-02/internal/infrastructure/database"
 	"milestone-02/internal/middleware"
 	"milestone-02/internal/repository/db"
 	"milestone-02/internal/repository/http"
 	"milestone-02/internal/usecase"
+	"milestone-02/internal/validation"
+	stdhttp "net/http"
+	"os"
+	"os/signal"
+	"syscall"
+	"time"
 
-	"github.com/go-playground/validator/v10"
 	"github.com/joho/godotenv"
 	"github.com/labstack/echo/v4"
 	echoMiddleware "github.com/labstack/echo/v4/middleware"
 	echoSwagger "github.com/swaggo/echo-swagger"
 )
-
-type CustomValidator struct {
-	validator *validator.Validate
-}
-func (cv *CustomValidator) Validate(i interface{}) error {
-	if err := cv.validator.Struct(i); err != nil {
-		return err
-	}
-	return nil
-}
-
 
 func main() {
 	err := godotenv.Load("file.env")
@@ -60,7 +56,7 @@ func main() {
 	e := echo.New()
 	e.Use(echoMiddleware.RequestLogger())
 	e.Use(echoMiddleware.Recover())
-	e.Validator = &CustomValidator{validator: validator.New()}
+	e.Validator = validation.New()
 
 	e.POST("/api/v1/users/register", authHandler.RegisterHandler)
 	e.POST("/api/v1/users/login", authHandler.LoginHandler)
@@ -84,5 +80,43 @@ func main() {
 	admin.PUT("/api/v1/vehicles/:id", adminHandler.UpdateVehicleHandler)
 	admin.GET("/api/v1/reports/revenue", adminHandler.GetRevenueReportHandler)
 	admin.GET("/api/v1/reports/top-vehicle", adminHandler.GetTopVehicleHandler)
-	e.Start(":" + cfg.App.Port)
+
+	ctx, stop := signal.NotifyContext(context.Background(), os.Interrupt, syscall.SIGTERM)
+	defer stop()
+
+	go startBookingCompletionWorker(ctx, repo)
+
+	go func() {
+		if err := e.Start(":" + cfg.App.Port); err != nil && err != stdhttp.ErrServerClosed {
+			e.Logger.Fatal("shutting down the server: ", err)
+		}
+	}()
+
+	<-ctx.Done()
+	shutdownCtx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+	defer cancel()
+	if err := e.Shutdown(shutdownCtx); err != nil {
+		e.Logger.Fatal(err)
+	}
+}
+
+func startBookingCompletionWorker(ctx context.Context, repo domain.UserRepository) {
+	complete := func() {
+		if err := repo.CompletePastBookings(); err != nil {
+			log.Printf("complete past bookings failed: %v", err)
+		}
+	}
+
+	complete()
+
+	ticker := time.NewTicker(time.Minute)
+	defer ticker.Stop()
+	for {
+		select {
+		case <-ticker.C:
+			complete()
+		case <-ctx.Done():
+			return
+		}
+	}
 }

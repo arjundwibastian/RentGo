@@ -24,6 +24,7 @@ type UserRepository interface {
 	CheckBookingUser(userID, bookingID int)(bool, error)
 	CancelUserBooking(booking *Booking) (*Booking, error)
 	CancelBookingAtomic(bookingID, userID int) (*Booking, error)
+	CompletePastBookings() error
 	
 
 

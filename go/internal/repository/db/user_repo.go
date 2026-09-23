@@ -265,6 +265,9 @@ func (r *gormUserRepo) CancelBookingAtomic(bookingID, userID int) (*domain.Booki
 		if booking.Status != "confirmed" {
 			return domain.ErrInvalidBookingCancel
 		}
+		if booking.BookingEnd.Before(time.Now()) {
+			return domain.ErrInvalidBookingCancel
+		}
 		if err := tx.Model(&domain.Booking{}).Where("id = ?", bookingID).
 			Update("status", "cancelled").Error; err != nil {
 			return err
@@ -280,6 +283,13 @@ func (r *gormUserRepo) CancelBookingAtomic(bookingID, userID int) (*domain.Booki
 		return nil, err
 	}
 	return &booking, nil
+}
+
+func (r *gormUserRepo) CompletePastBookings() error {
+	return r.db.Model(&domain.Booking{}).
+		Where("status = ?", "confirmed").
+		Where("booking_end < ?", time.Now()).
+		Update("status", "completed").Error
 }
 
 func(r *gormUserRepo) CreateNewVehicles(vehicle *domain.Vehicle) (*domain.Vehicle, error) {

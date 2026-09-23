@@ -21,13 +21,13 @@ type TopUpRequest struct {
 }
 
 type DateRequest struct {
-	BookingStart time.Time `json:"bookingStart" validate:"required"`
+	BookingStart time.Time `json:"bookingStart" validate:"required,not_before_today"`
 	TotalDays	int	`json:"totalDays" validate:"required,min=1"`
 }
 type BookingRequest struct {
 	VehicleID    	int `json:"vehicleID" validate:"required"`
 	TotalDays		int	`json:"totalDays" validate:"required,min=1"`
-	BookingStart 	time.Time `json:"bookingStart" validate:"required"`
+	BookingStart 	time.Time `json:"bookingStart" validate:"required,not_before_today"`
 }
 type CancelRequest struct {
 	BookingID  int `json:"bookingID" validate:"required"`

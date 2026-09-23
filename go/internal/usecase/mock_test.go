@@ -42,6 +42,7 @@ type MockUserRepo struct {
     CancelUserBookingErr    error
     CancelBookingAtomicResult *domain.Booking
     CancelBookingAtomicErr    error
+    CompletePastBookingsErr    error
    
 
     RegisterUserCalled *domain.User
@@ -128,6 +129,9 @@ func(m *MockUserRepo) CancelBookingAtomic(bookingID, userID int) (*domain.Bookin
 		return m.CancelBookingAtomicResult, m.CancelBookingAtomicErr
 	}
 	return m.CancelUserBookingResult, m.CancelUserBookingErr
+}
+func(m *MockUserRepo) CompletePastBookings() error {
+	return m.CompletePastBookingsErr
 }
 
 
