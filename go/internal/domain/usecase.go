@@ -11,7 +11,7 @@ type AuthUseCase interface {
 
 type UserUseCase interface {
 	GetProfile(userID int) (*User, error)
-	AddUserTotalBalance(userID int, topUpAmount int) (*int, error)
+	AddUserTotalBalance(userID int, topUpAmount int64) (*int64, error)
 	GetVehicleList() (*[]Vehicle, error)
 	GetVehicleAvailableByDate(req dto.DateRequest) (*[]dto.VehicleAvailableResponse, error)
 	CreateNewBooking(req dto.BookingRequest, userID int) (*Booking, error)

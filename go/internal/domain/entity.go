@@ -7,7 +7,7 @@ type User struct {
 	Email     	string
 	FullName  	string
 	Password  	string `json:"-"`
-	Balance	  	int
+	Balance	  	int64
 	PhoneNumber	string
 	Address 	string
 	Role		string	`json:"-"`
@@ -20,7 +20,7 @@ type Vehicle struct {
 	Name        string
 	Description string
 	Quantity    int
-	DailyRate	int
+	DailyRate	int64
 	Category	string
 	CreatedAt   time.Time `json:"-"`
 	UpdatedAt 	time.Time `json:"-"`
@@ -32,7 +32,7 @@ type Booking struct {
 	VehicleID		int
 	BookingStart	time.Time
 	BookingEnd		time.Time
-	TotalPrice		int
+	TotalPrice		int64
 	Status			string
 	CreatedAt   	time.Time
 	UpdatedAt 		time.Time

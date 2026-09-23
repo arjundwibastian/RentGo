@@ -17,7 +17,7 @@ func TestAddUserBalance_Success(t *testing.T) {
 	req := dto.TopUpRequest{
 		Amount: 200000,
 	}
-	balance := 150000
+	balance := int64(150000)
 	userID := 1
 	mockRepo.GetUserBalanceResult = &balance
 	mockRepo.GetUserBalanceErr = nil
@@ -45,7 +45,7 @@ func TestAddUserBalance_UserNotFound(t *testing.T) {
 	req := dto.TopUpRequest{
 		Amount: 200000,
 	}
-	balance := 150000
+	balance := int64(150000)
 	userID := 7377
 	mockRepo.GetUserBalanceResult = nil
 	mockRepo.GetUserBalanceErr = gorm.ErrRecordNotFound
@@ -94,7 +94,7 @@ func TestCreateNewBooking_Success(t *testing.T) {
 	mockRepo.CreateBookingAtomicResult = expectedBooking
 	mockRepo.CreateBookingAtomicErr = nil
 
-	updatedBalance := 300000
+	updatedBalance := int64(300000)
 	mockRepo.UpdateBalanceResult = &updatedBalance
 	mockRepo.UpdateBalanceErr = nil 
 

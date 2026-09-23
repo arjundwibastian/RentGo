@@ -23,17 +23,12 @@ func (uc *userUseCase) GetProfile(userID int) (*domain.User, error) {
 	return user, nil
 }
 
-func (uc *userUseCase) AddUserTotalBalance(userID int, topUpAmount int) (*int, error) {
-	balance, err := uc.repo.GetUserBalance(userID)
+func (uc *userUseCase) AddUserTotalBalance(userID int, topUpAmount int64) (*int64, error) {
+	updatedBalance, err := uc.repo.AddUserBalanceAtomic(userID, topUpAmount)
 	if err != nil {
 		return nil, err
 	}
-	updatedBalance := *balance + topUpAmount
-	_,err = uc.repo.UpdateBalance(userID, updatedBalance)
-	if err != nil {
-		return nil, err
-	}
-	return &updatedBalance, nil
+	return updatedBalance, nil
 }
 
 func (uc *userUseCase) GetVehicleList() (*[]domain.Vehicle, error) {
@@ -61,7 +56,7 @@ func (uc *userUseCase) CreateNewBooking(req dto.BookingRequest, userID int,) (*d
 	if err != nil {
 		return nil, err
 	}
-	totalPrice := req.TotalDays * vehicle.DailyRate
+	totalPrice := int64(req.TotalDays) * vehicle.DailyRate
 	endDate := req.BookingStart.AddDate(0,0, req.TotalDays)
 	newBooking := &domain.Booking{
 		UserID: userID,

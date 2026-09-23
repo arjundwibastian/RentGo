@@ -10,8 +10,9 @@ type UserRepository interface {
 	RegisterUser(user *User) error
 	ValidateUserLogin(userLogin *dto.LoginRequest) (*User, error)
 	GetUserProfile(userID int) (*User, error)
-	GetUserBalance(userID int) (*int, error)
-	UpdateBalance(userID int, updateBalance int) (*int, error)
+	GetUserBalance(userID int) (*int64, error)
+	UpdateBalance(userID int, updateBalance int64) (*int64, error)
+	AddUserBalanceAtomic(userID int, amount int64) (*int64, error)
 	GetVehicles() (*[]Vehicle, error)
 	GetVehiclesAvailableByDate(reqStart, reqEnd time.Time) (*[]dto.VehicleAvailableResponse, error)
 	GetVehicleByID(vehicleID int) (*Vehicle, error)

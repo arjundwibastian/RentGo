@@ -17,7 +17,7 @@ type LoginRequest struct {
 }
 
 type TopUpRequest struct {
-	Amount int `json:"amount" validate:"required,min=10000"`
+	Amount int64 `json:"amount" validate:"required,min=10000"`
 }
 
 type DateRequest struct {
@@ -37,6 +37,6 @@ type VehicleRequest struct {
 	Name	string `json:"name" validate:"required"`
 	Description	string `json:"description" validate:"required"`
 	Quantity	int `json:"quantity" validate:"required"`
-	DailyRate	int `json:"dailyRate" validate:"required"`
+	DailyRate	int64 `json:"dailyRate" validate:"required"`
 	Category	string `json:"category" validate:"required"`
 }

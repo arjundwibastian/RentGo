@@ -62,8 +62,8 @@ func (r *gormUserRepo) GetUserProfile(userID int) (*domain.User, error) {
 	}
 	return &user, nil
 }
-func (r *gormUserRepo) GetUserBalance(userID int) (*int, error) {
-	var balance int
+func (r *gormUserRepo) GetUserBalance(userID int) (*int64, error) {
+	var balance int64
 	var user domain.User
 	err := r.db.Model(&user).Where("id = ?", userID).Pluck("balance", &balance).Error
 	if err != nil {
@@ -71,13 +71,33 @@ func (r *gormUserRepo) GetUserBalance(userID int) (*int, error) {
 	}
 	return &balance, nil
 }
-func (r *gormUserRepo) UpdateBalance(userID int, updatedBalance int) (*int, error) {
+func (r *gormUserRepo) UpdateBalance(userID int, updatedBalance int64) (*int64, error) {
 	var user domain.User
 	err := r.db.Model(&user).Where("id = ?", userID).Update("balance", updatedBalance).Error
 	if err != nil{
 		return nil, err
 	}
 	return &updatedBalance, nil
+}
+
+func (r *gormUserRepo) AddUserBalanceAtomic(userID int, amount int64) (*int64, error) {
+	var user domain.User
+	err := r.db.Transaction(func(tx *gorm.DB) error {
+		if err := tx.Clauses(clause.Locking{Strength: "UPDATE"}).
+			Where("id = ?", userID).First(&user).Error; err != nil {
+			return err
+		}
+		if err := tx.Model(&domain.User{}).Where("id = ?", userID).
+			Update("balance", gorm.Expr("balance + ?", amount)).Error; err != nil {
+			return err
+		}
+		user.Balance += amount
+		return nil
+	})
+	if err != nil {
+		return nil, err
+	}
+	return &user.Balance, nil
 }
 
 func (r *gormUserRepo) GetVehicleByID(vehicleID int) (*domain.Vehicle, error) {

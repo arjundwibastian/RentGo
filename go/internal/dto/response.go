@@ -13,14 +13,14 @@ type VehicleAvailableResponse struct {
 	Name        string `json:"name"`
 	Description string	`json:"desc"`
 	AvailableQuantity    int `json:"availableQuantity"`
-	DailyRate   int		`json:"dailyRate"`
+	DailyRate   int64		`json:"dailyRate"`
 	Category    string	`json:"category"`
 	CreatedAt   time.Time `json:"-"`
 	UpdatedAt   time.Time `json:"-"`
 }
 
 type RevenueReportResponse struct {
-	TotalRevenue int `json:"total_revenue"`
+	TotalRevenue int64 `json:"total_revenue"`
 	TotalBookings int `json:"total_bookings"`
 }
 

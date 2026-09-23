@@ -14,10 +14,12 @@ type MockUserRepo struct {
     ValidateUserLoginErr    error
     GetUserProfileResult *domain.User
     GetUserProfileErr    error
-    GetUserBalanceResult *int
+    GetUserBalanceResult *int64
     GetUserBalanceErr    error
-	UpdateBalanceResult	*int
+	UpdateBalanceResult	*int64
     UpdateBalanceErr error
+	AddUserBalanceAtomicResult *int64
+	AddUserBalanceAtomicErr error
     GetVehiclesResult *[]domain.Vehicle
     GetVehiclesErr    error
 	GetVehiclesAvailableByDateResult *[]dto.VehicleAvailableResponse
@@ -69,10 +71,23 @@ func(m *MockUserRepo) ValidateUserLogin(userLogin *dto.LoginRequest) (*domain.Us
 func(m *MockUserRepo) GetUserProfile(userID int) (*domain.User, error) {
 	return m.GetUserProfileResult, m.GetUserProfileErr
 }
-func(m *MockUserRepo) GetUserBalance(userID int) (*int, error) {
+func(m *MockUserRepo) GetUserBalance(userID int) (*int64, error) {
 	return m.GetUserBalanceResult, m.GetUserBalanceErr
 }
-func(m *MockUserRepo) UpdateBalance(userID int, updateBalance int) (*int, error) {
+func(m *MockUserRepo) UpdateBalance(userID int, updateBalance int64) (*int64, error) {
+	return m.UpdateBalanceResult, m.UpdateBalanceErr
+}
+func(m *MockUserRepo) AddUserBalanceAtomic(userID int, amount int64) (*int64, error) {
+	if m.AddUserBalanceAtomicResult != nil || m.AddUserBalanceAtomicErr != nil {
+		return m.AddUserBalanceAtomicResult, m.AddUserBalanceAtomicErr
+	}
+	if m.GetUserBalanceErr != nil {
+		return nil, m.GetUserBalanceErr
+	}
+	if m.GetUserBalanceResult != nil {
+		newBalance := *m.GetUserBalanceResult + amount
+		return &newBalance, nil
+	}
 	return m.UpdateBalanceResult, m.UpdateBalanceErr
 }
 func(m *MockUserRepo) GetVehicles() (*[]domain.Vehicle, error) {
